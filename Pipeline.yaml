@@ -1,0 +1,43 @@
+# Azure DevOps Pipeline YAML
+
+trigger:
+  branches:
+    include:
+      - main
+
+jobs:
+- job: TerraformDeployment
+  displayName: 'Terraform Deployment'
+  pool:
+    vmImage: 'ubuntu-latest'
+  steps:
+  - task: UseDotNet@2
+    inputs:
+      version: '3.x'
+  - task: TerraformInstaller@2
+    inputs:
+      terraformVersion: '1.1.0'
+  - script: |
+      cd terraform
+      terraform init
+      terraform validate
+      terraform plan -var-file=resource_group.tfvars
+      terraform apply -auto-approve -var-file=resource_group.tfvars
+      terraform plan -var-file=app_service_frontend.tfvars
+      terraform apply -auto-approve -var-file=app_service_frontend.tfvars
+      terraform plan -var-file=app_service_backend.tfvars
+      terraform apply -auto-approve -var-file=app_service_backend.tfvars
+      terraform plan -var-file=sql_managed_instance.tfvars
+      terraform apply -auto-approve -var-file=sql_managed_instance.tfvars
+    displayName: 'Terraform Apply'
+
+- job: Test
+  displayName: 'Run Tests'
+  dependsOn: TerraformDeployment
+  pool:
+    vmImage: 'windows-latest'
+  steps:
+  - task: PowerShell@2
+    inputs:
+      filePath: 'test.ps1'
+    displayName: 'Run Tests'
