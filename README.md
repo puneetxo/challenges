@@ -2,10 +2,10 @@
 
 
 Azure resources used:
-Resource group
-Network and subnets
-App service-web app
-SQL MAnaged instance
+Resource group,
+Network and subnets,
+App service-web app,
+SQL MAnaged instance,
 App service- Web app
 
 there is on main.tf file with all the base infra and workload code.
